@@ -32,22 +32,114 @@ static uint64_t C_DECRYPT_FINAL = 0x44;
 static uint64_t C_GENERATE_KEY_PAIR = 0x51;
 
 
+    CK_RV C_GetSlotList(CK_BBOOL only_token, CK_SLOT_ID_PTR slot_list, CK_ULONG_PTR count){
+        uint64_t params[3] = {only_token, slot_list, count};
+        return mmk_syscall_pkcs(C_GET_SLOT_LIST, params);
+    }
 
-
-    CK_RV C_Initialize(CK_VOID_PTR ptr){
-        uint64_t params[1] = {ptr};
+    CK_RV C_Initialize(CK_VOID_PTR callback){
+        void* p = callback;
+        uint64_t params[1] = {callback};
         mmk_syscall_pkcs(C_INITIALIZE, params);
+        ((void(*)(void))(callback))();
         return 0;
     }
 
-    CK_RV C_Finalize(CK_VOID_PTR ptr){
-        uint64_t params[1] = {ptr};
+    CK_RV C_Finalize(CK_VOID_PTR callback){
+        uint64_t params[1] = {callback};
         mmk_syscall_pkcs(C_FINALIZE, params);
+        ((void(*)(void))(callback))();
         return 0;
     }
 
-    
+    CK_RV C_GetFunctionList(CK_FUNCTION_LIST_PTR_PTR func_list){
+        uint64_t params[1] = {func_list};
+        return mmk_syscall_pkcs(C_GET_FUNCTION_LIST, params);
+    }
 
+    CK_RV C_OpenSession(CK_SLOT_ID slot, CK_FLAGS flags, CK_VOID_PTR ptr, CK_NOTIFY notify,
+                        CK_SESSION_HANDLE_PTR session){
+        uint64_t params[5] = {slot, flags, ptr, notify, session};
+        return mmk_syscall_pkcs(C_OPEN_SESSION, params);
+    }
+
+    CK_RV C_CloseSession(CK_SESSION_HANDLE session){
+        uint64_t params[1] = {session};
+        return mmk_syscall_pkcs(C_CLOSE_SESSION, params);
+    }
+
+
+    CK_RV C_Login(CK_SESSION_HANDLE session, CK_USER_TYPE usr, CK_CHAR_PTR chars,  CK_ULONG val){
+        uint64_t params[4] = {session, usr, chars, val};
+        return mmk_syscall_pkcs(C_LOGIN, params);
+    }
+
+    CK_RV C_Logout(CK_SESSION_HANDLE session){
+        uint64_t params[1] = {session};
+        return mmk_syscall_pkcs(C_LOGOUT, params);
+    }
+
+
+    CK_RV C_Encrypt(CK_SESSION_HANDLE session, CK_BYTE_PTR in,  CK_ULONG in_len, CK_BYTE_PTR out,
+                    CK_ULONG_PTR out_len){
+        uint64_t params[5] = {session, in, in_len, out, out_len};
+        return mmk_syscall_pkcs(C_ENCRYPT, params);
+    }
+
+    CK_RV C_EncryptFinal(CK_SESSION_HANDLE session, CK_BYTE_PTR last_out, CK_ULONG_PTR last_out_len){
+        uint64_t params[3] = {session, last_out, last_out_len};
+        return mmk_syscall_pkcs(C_ENCRYPT_FINAL, params);
+    }
+
+    CK_RV C_EncryptInit(CK_SESSION_HANDLE session, CK_MECHANISM_PTR mech, CK_OBJECT_HANDLE key){
+        uint64_t params[3] = {session, mech, key};
+        return mmk_syscall_pkcs(C_ENCRYPT_INIT, params);
+    }
+
+    CK_RV C_EncryptUpdate(CK_SESSION_HANDLE session, CK_BYTE_PTR in,  CK_ULONG in_len, CK_BYTE_PTR out,
+                          CK_ULONG_PTR out_len){
+        uint64_t params[5] = {session, in, in_len, out, out_len};
+        return mmk_syscall_pkcs(C_ENCRYPT_UPDATE, params);
+    }
+
+    CK_RV C_Decrypt(CK_SESSION_HANDLE session, CK_BYTE_PTR in, CK_ULONG in_len, CK_BYTE_PTR out,
+                    CK_ULONG_PTR out_len){
+        uint64_t params[5] = {session, in, in_len, out, out_len};
+        return mmk_syscall_pkcs(C_DECRYPT, params);
+    }
+
+    CK_RV C_DecryptFinal(CK_SESSION_HANDLE session, CK_BYTE_PTR last_out, CK_ULONG_PTR last_out_len){
+        uint64_t params[3] = {session, last_out, last_out_len};
+        return mmk_syscall_pkcs(C_DECRYPT_FINAL, params);
+    }
+
+    CK_RV C_DecryptInit(CK_SESSION_HANDLE session, CK_MECHANISM_PTR mech, CK_OBJECT_HANDLE key){
+        uint64_t params[3] = {session, mech, key};
+        return mmk_syscall_pkcs(C_DECRYPT_INIT, params);
+    }
+
+    CK_RV C_DecryptUpdate(CK_SESSION_HANDLE session, CK_BYTE_PTR in, CK_ULONG in_len, CK_BYTE_PTR out,
+                    CK_ULONG_PTR out_len){
+        uint64_t params[5] = {session, in, in_len, out, out_len};
+        return mmk_syscall_pkcs(C_DECRYPT_UPDATE, params);
+    }
+
+    CK_RV C_GenerateKeyPair(CK_SESSION_HANDLE session, CK_MECHANISM_PTR mech,
+                            CK_ATTRIBUTE_PTR pub_template,  CK_ULONG pub_attr_count, 
+                            CK_ATTRIBUTE_PTR priv_template, CK_ULONG priv_attr_count,
+                             CK_OBJECT_HANDLE_PTR pub_key, CK_OBJECT_HANDLE_PTR priv_key){
+        uint64_t params[8] = {session, mech, pub_template, pub_attr_count, priv_template, priv_attr_count, pub_key, priv_key};
+        return mmk_syscall_pkcs(C_GENERATE_KEY_PAIR, params);
+        return 0;
+    }
+
+
+
+
+    CK_RV C_GetInfo(CK_INFO_PTR info_buf){
+        //not implemented yet.
+        return 0;
+    }
 
     CK_RV C_CancelFunction(CK_SESSION_HANDLE session){
         //not implemented yet.
@@ -59,10 +151,6 @@ static uint64_t C_GENERATE_KEY_PAIR = 0x51;
         return 0;
     }
 
-    CK_RV C_CloseSession(CK_SESSION_HANDLE session){
-        //not implemented yet.
-        return 0;
-    }
 
     CK_RV C_CopyObject(CK_SESSION_HANDLE session, CK_OBJECT_HANDLE obj,
                        CK_ATTRIBUTE_PTR attr, CK_ULONG val, CK_OBJECT_HANDLE_PTR target){
@@ -76,33 +164,12 @@ static uint64_t C_GENERATE_KEY_PAIR = 0x51;
         return 0;
     }
 
-    CK_RV C_Decrypt(CK_SESSION_HANDLE session, CK_BYTE_PTR buf, CK_ULONG val, CK_BYTE_PTR byte,
-                    CK_ULONG_PTR what){
-        //not implemented yet.
-        return 0;
-    }
 
     CK_RV C_DecryptDigestUpdate(CK_SESSION_HANDLE session, CK_BYTE_PTR buf, CK_ULONG val,
                                 CK_BYTE_PTR byte, CK_ULONG_PTR what){
         //not implemented yet.
         return 0;
     }
-
-    CK_RV C_DecryptFinal(CK_SESSION_HANDLE session, CK_BYTE_PTR byte, CK_ULONG_PTR val){
-        //not implemented yet.
-        return 0;
-    }
-
-    CK_RV C_DecryptInit(CK_SESSION_HANDLE session, CK_MECHANISM_PTR mech, CK_OBJECT_HANDLE obj){
-        //not implemented yet.
-        return 0;
-    }
-
-    CK_RV C_DecryptUpdate(CK_SESSION_HANDLE session, CK_BYTE_PTR val,  CK_ULONG ulv, CK_BYTE_PTR byte_val,
-                          CK_ULONG_PTR tar){
-        //not implemented yet.
-        return 0;
-                          }
 
     CK_RV C_DecryptVerifyUpdate(CK_SESSION_HANDLE session, CK_BYTE_PTR byte, CK_ULONG val,
                                 CK_BYTE_PTR byte_val, CK_ULONG_PTR tar){
@@ -152,29 +219,6 @@ static uint64_t C_GENERATE_KEY_PAIR = 0x51;
 
     }
 
-    CK_RV C_Encrypt(CK_SESSION_HANDLE session, CK_BYTE_PTR byte_val,  CK_ULONG val, CK_BYTE_PTR byte,
-                    CK_ULONG_PTR tar){
-                        //not implemented yet.
-        return 0;
-                    }
-
-    CK_RV C_EncryptFinal(CK_SESSION_HANDLE session, CK_BYTE_PTR byte_val, CK_ULONG_PTR tar){
-        //not implemented yet.
-        return 0;
-    }
-
-    CK_RV C_EncryptInit(CK_SESSION_HANDLE session, CK_MECHANISM_PTR mech, CK_OBJECT_HANDLE obj){
-        //not implemented yet.
-        return 0;
-    }
-
-    CK_RV C_EncryptUpdate(CK_SESSION_HANDLE session, CK_BYTE_PTR byte_val,  CK_ULONG val, CK_BYTE_PTR byte,
-                          CK_ULONG_PTR tar){
-                            //not implemented yet.
-        return 0;
-                          }
-
-
     CK_RV C_FindObjects(CK_SESSION_HANDLE session, CK_OBJECT_HANDLE_PTR obj_tar,  CK_ULONG val,
                         CK_ULONG_PTR tar){
                             //not implemented yet.
@@ -197,14 +241,6 @@ static uint64_t C_GENERATE_KEY_PAIR = 0x51;
         return 0;
                         }
 
-    CK_RV C_GenerateKeyPair(CK_SESSION_HANDLE session, CK_MECHANISM_PTR mech,
-                            CK_ATTRIBUTE_PTR attr,  CK_ULONG val, CK_ATTRIBUTE_PTR attr2,
-                             CK_ULONG val2, CK_OBJECT_HANDLE_PTR obj1,
-                            CK_OBJECT_HANDLE_PTR obj2){
-                                //not implemented yet.
-        return 0;
-                            }
-
     CK_RV C_GenerateRandom(CK_SESSION_HANDLE session, CK_BYTE_PTR byte_val,  CK_ULONG val){
         //not implemented yet.
         return 0;
@@ -216,20 +252,12 @@ static uint64_t C_GENERATE_KEY_PAIR = 0x51;
         return 0;
                               }
 
-    CK_RV C_GetFunctionList(CK_FUNCTION_LIST_PTR_PTR func_list){
-        //not implemented yet.
-        return 0;
-    }
 
     CK_RV C_GetFunctionStatus(CK_SESSION_HANDLE session){
         //not implemented yet.
         return 0;
     }
 
-    CK_RV C_GetInfo(CK_INFO_PTR info){
-        //not implemented yet.
-        return 0;
-    }
 
     CK_RV C_GetMechanismInfo(CK_SLOT_ID slot, CK_MECHANISM_TYPE mech,
                              CK_MECHANISM_INFO_PTR info){
@@ -262,10 +290,6 @@ static uint64_t C_GENERATE_KEY_PAIR = 0x51;
         return 0;
     }
 
-    CK_RV C_GetSlotList(CK_BBOOL bo, CK_SLOT_ID_PTR slot_ids, CK_ULONG_PTR tar){
-        //not implemented yet.
-        return 0;
-    }
 
     CK_RV C_GetTokenInfo(CK_SLOT_ID slot, CK_TOKEN_INFO_PTR token){
         //not implemented yet.
@@ -282,21 +306,13 @@ static uint64_t C_GENERATE_KEY_PAIR = 0x51;
         return 0;
     }
 
-    CK_RV C_Login(CK_SESSION_HANDLE session, CK_USER_TYPE usr, CK_CHAR_PTR chars,  CK_ULONG val){
-        //not implemented yet.
+    CK_RV C_LoginUser(CK_SESSION_HANDLE session, CK_USER_TYPE usr,
+                      CK_UTF8CHAR * u8char1,  CK_ULONG val1,
+                      CK_UTF8CHAR * u8char2,  CK_ULONG val2){
+                        //not implemented yet.
         return 0;
-    }
+                      }
 
-    CK_RV C_Logout(CK_SESSION_HANDLE session){
-        //not implemented yet.
-        return 0;
-    }
-
-    CK_RV C_OpenSession(CK_SLOT_ID slot, CK_FLAGS flags, CK_VOID_PTR ptr, CK_NOTIFY notify,
-                        CK_SESSION_HANDLE_PTR session){
-                            //not implemented yet.
-        return 0;
-                        }
 
     CK_RV C_SeedRandom(CK_SESSION_HANDLE session, CK_BYTE_PTR byte_val,  CK_ULONG val){
         //not implemented yet.
@@ -422,12 +438,6 @@ static uint64_t C_GENERATE_KEY_PAIR = 0x51;
         return 0;
                          }
 
-    CK_RV C_LoginUser(CK_SESSION_HANDLE session, CK_USER_TYPE usr,
-                      CK_UTF8CHAR * u8char1,  CK_ULONG val1,
-                      CK_UTF8CHAR * u8char2,  CK_ULONG val2){
-                        //not implemented yet.
-        return 0;
-                      }
 
     CK_RV C_SessionCancel(CK_SESSION_HANDLE session, CK_FLAGS flags){
         //not implemented yet.
