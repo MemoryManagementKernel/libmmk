@@ -1,5 +1,5 @@
-#ifndef _SYSCALL_H_
-#define _SYSCALL_H_
+#ifndef _MMKSYSCALL_H_
+#define _MMKSYSCALL_H_
 
 #include <stdint.h>
 

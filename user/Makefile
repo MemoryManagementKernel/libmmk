@@ -9,7 +9,7 @@ OBJ = $(addsuffix .o, $(basename $(SRC)))
 INCFLAGS := -I$(WORK_DIR)/include
 
 CFLAGS = -fno-pic -static -O2 -Wall $(INCFLAGS) \
-         -fno-builtin -fno-stack-protector -ffreestanding -Wno-main
+         -fno-stack-protector -ffreestanding -Wno-main
 
 # Build target
 LIB = $(BUILD_DIR)/libmmk_u.a
@@ -17,7 +17,7 @@ LIB = $(BUILD_DIR)/libmmk_u.a
 all: $(LIB)
 
 $(LIB): $(OBJ)
-	$(AR) cr $@ $^
+	$(AR) -r $@ $^
 
 # Compile: a single `.c` -> `.o` (gcc)
 $(DST_DIR)/%.o: %.c
